@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Frios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .frio {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Controle de Frios</h1>
+    <div id="friosContainer"></div>
+    <button onclick="adicionarFrio()">+ Adicionar Frio</button>
+
+    <script>
+        // Recupera os frios armazenados localmente ou inicializa como vazio
+        let frios = JSON.parse(localStorage.getItem('frios')) || [];
+
+        function renderFrios() {
+            const container = document.getElementById('friosContainer');
+            container.innerHTML = '';
+
+            frios.forEach((frio, index) => {
+                container.innerHTML += `
+                    <div class="frio">
+                        <h3>${frio.nome}</h3>
+                        <p>Quilos totais: ${frio.quilosTotais.toFixed(2)} kg</p>
+                        <p>Quilos vendidos: ${frio.quilosVendidos.toFixed(2)} kg</p>
+                        <p>Quilos restantes: ${(frio.quilosTotais - frio.quilosVendidos).toFixed(2)} kg</p>
+                        <input type="number" id="vender-${index}" placeholder="Quilos vendidos">
+                        <button onclick="vender(${index})">Vender</button>
+                        <hr>
+                    </div>
+                `;
+            });
+        }
+
+        function adicionarFrio() {
+            const nome = prompt('Nome do frio:');
+            const quilosTotais = parseFloat(prompt('Quantidade em kg comprada:'));
+            
+            if (nome && quilosTotais > 0) {
+                frios.push({
+                    nome,
+                    quilosTotais,
+                    quilosVendidos: 0
+                });
+                salvarFrios();
+                renderFrios();
+            } else {
+                alert('Nome inválido ou quantidade inválida.');
+            }
+        }
+
+        function vender(index) {
+            const quilosVendidos = parseFloat(document.getElementById(`vender-${index}`).value);
+            
+            if (quilosVendidos > 0 && quilosVendidos <= (frios[index].quilosTotais - frios[index].quilosVendidos)) {
+                frios[index].quilosVendidos += quilosVendidos;
+                salvarFrios();
+                renderFrios();
+            } else {
+                alert('Quantidade inválida ou maior que o estoque disponível.');
+            }
+        }
+
+        function salvarFrios() {
+            localStorage.setItem('frios', JSON.stringify(frios));
+        }
+
+        // Renderiza a lista inicial de frios ao carregar a página
+        renderFrios();
+    </script>
+
+</body>
+</html>
