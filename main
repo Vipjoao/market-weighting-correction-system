@@ -12,6 +12,17 @@
         .frio {
             margin-bottom: 20px;
         }
+        .reabastecer {
+            color: red;
+            font-size: 12px;
+        }
+        .delete-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -29,14 +40,19 @@
             container.innerHTML = '';
 
             frios.forEach((frio, index) => {
+                const quilosRestantes = frio.quilosTotais - frio.quilosVendidos;
+                const percentualRestante = (quilosRestantes / frio.quilosTotais) * 100;
+
                 container.innerHTML += `
                     <div class="frio">
                         <h3>${frio.nome}</h3>
                         <p>Quilos totais: ${frio.quilosTotais.toFixed(2)} kg</p>
                         <p>Quilos vendidos: ${frio.quilosVendidos.toFixed(2)} kg</p>
-                        <p>Quilos restantes: ${(frio.quilosTotais - frio.quilosVendidos).toFixed(2)} kg</p>
-                        <input type="number" id="vender-${index}" placeholder="Quilos vendidos">
+                        <p>Quilos restantes: ${quilosRestantes.toFixed(2)} kg</p>
+                        <input type="number" id="vender-${index}" placeholder="Gramas vendidas">
                         <button onclick="vender(${index})">Vender</button>
+                        ${percentualRestante <= 25 ? `<p class="reabastecer">Reabastecer logo</p>` : ''}
+                        <button class="delete-button" onclick="excluirFrio(${index})">Excluir</button>
                         <hr>
                     </div>
                 `;
@@ -61,14 +77,23 @@
         }
 
         function vender(index) {
-            const quilosVendidos = parseFloat(document.getElementById(`vender-${index}`).value);
+            const gramasVendidas = parseFloat(document.getElementById(`vender-${index}`).value);
+            const quilosVendidos = gramasVendidas / 1000; // Converte gramas para quilos
             
-            if (quilosVendidos > 0 && quilosVendidos <= (frios[index].quilosTotais - frios[index].quilosVendidos)) {
+            if (gramasVendidas > 0 && quilosVendidos <= (frios[index].quilosTotais - frios[index].quilosVendidos)) {
                 frios[index].quilosVendidos += quilosVendidos;
                 salvarFrios();
                 renderFrios();
             } else {
                 alert('Quantidade inválida ou maior que o estoque disponível.');
+            }
+        }
+
+        function excluirFrio(index) {
+            if (confirm(`Tem certeza que deseja excluir o frio "${frios[index].nome}"?`)) {
+                frios.splice(index, 1);
+                salvarFrios();
+                renderFrios();
             }
         }
 
